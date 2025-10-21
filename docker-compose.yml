@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  freqtrade:
+    build: .
+    container_name: traderbot
+    restart: unless-stopped
+    volumes:
+      - ./user_data:/app/user_data
+      - ./config:/app/config
+      - ./strategies:/app/strategies
+      - ./logs:/app/logs
+    environment:
+      - FREQTRADE_CONFIG=/app/config/config.json
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"  # API server port
+    command: freqtrade trade --config config/config.json
+    
+  freqtrade-dry-run:
+    build: .
+    container_name: traderbot-dry-run
+    restart: unless-stopped
+    volumes:
+      - ./user_data:/app/user_data
+      - ./config:/app/config
+      - ./strategies:/app/strategies
+      - ./logs:/app/logs
+    environment:
+      - FREQTRADE_CONFIG=/app/config/config_dry_run.json
+    env_file:
+      - .env
+    ports:
+      - "8081:8080"  # Different port for dry run
+    command: freqtrade trade --config config/config_dry_run.json
+    
+  # Optional: Database service for advanced features
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: traderbot-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: freqtrade
+  #     POSTGRES_USER: freqtrade
+  #     POSTGRES_PASSWORD: freqtrade
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+# volumes:
+#   postgres_data:
